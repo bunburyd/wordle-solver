@@ -190,8 +190,8 @@ if __name__ == "__main__":
 
     else:
         print("For each guess enter 5 characters representing the colour pattern\n")
-        print("Y = match in right position (green)")
-        print("S = match in wrong position (yellow)")
-        print("N = no match (grey)\n\n")
+        print("Y = Yes, this letter matches in this position (green)")
+        print("S = Somewhere, this letter matches but not in this position (yellow)")
+        print("N = No, this letter is not in the answer (grey)\n\n")
 
         iterate_over_attempts(get_user_input, decision_tree)
