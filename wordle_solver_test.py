@@ -24,23 +24,21 @@ def test_decision_tree():
 
     decision_tree = wordle_solver.DecisionTree(answers, "latch")
 
-    assert decision_tree.get_next_guess() == "latch"
+    next_guess = decision_tree.get_next_guess()
+    assert next_guess == "latch"
 
-    decision_tree.set_comparison("NYYYY")
+    decision_tree.set_comparison(next_guess, "NYYYY")
 
     assert decision_tree.remaining_answers == ["batch", "catch", "hatch"]
 
-    assert decision_tree.get_next_guess() == "batch"
+    next_guess = decision_tree.get_next_guess()
+    assert next_guess == "batch"
 
-    decision_tree.set_comparison("NYYYY")
-
+    decision_tree.set_comparison(next_guess, "NYYYY")
     assert decision_tree.remaining_answers == ["catch", "hatch"]
 
-    assert decision_tree.get_next_guess() == "catch"
+    next_guess = decision_tree.get_next_guess()
+    assert next_guess == "catch"
 
-    decision_tree.set_comparison("YYYYY")
-
+    decision_tree.set_comparison(next_guess, "YYYYY")
     assert decision_tree.remaining_answers == ["catch"]
-
-
-

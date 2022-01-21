@@ -1,4 +1,5 @@
 import argparse
+import re
 
 from collections import Counter
 from functools import lru_cache
@@ -10,9 +11,7 @@ WRONG_LETTER = "N"
 WINNING_PATTERN = MATCHING_LETTER * 5
 
 MAX_ATTEMPTS = 6
-
 FAILED = 999
-
 BEST_STARTING_GUESS_DEFAULT = "raise"
 
 
@@ -40,9 +39,9 @@ class DecisionTree:
         self.current_node = self.root_node
         self.remaining_answers = self.answers
 
-    def set_comparison(self, comparison):
+    def set_comparison(self, guess, comparison):
 
-        guess = self.current_node.word
+        self.current_node.word = guess
 
         self.remaining_answers = [
             answer for answer in self.remaining_answers
@@ -76,7 +75,7 @@ class DecisionTree:
         return self.current_node.word
 
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=100000)
 def wordle_compare(guess, answer):
     response = ""
     cross_match_counter = Counter()
@@ -116,35 +115,42 @@ def distribution_score(guess, answers, lowest_score):
     return matches
 
 
-def iterate_over_attempts(comparison_func, decision_tree: DecisionTree, answer=None):
+def iterate_over_attempts(input_function, decision_tree: DecisionTree, answer=None):
     for attempt in range(1, MAX_ATTEMPTS + 1):
 
-        next_guess = decision_tree.get_next_guess()
+        suggestion = decision_tree.get_next_guess()
 
-        comparison = comparison_func(attempt, next_guess, answer)
+        guess, comparison = input_function(attempt, suggestion, answer)
 
         if comparison == WINNING_PATTERN:
             print(f"Correct on {attempt}")
-            results.update(str(attempt))
             return attempt
 
-        decision_tree.set_comparison(comparison)
+        decision_tree.set_comparison(guess, comparison)
 
     print(f"Failed!")
 
-    return 999
+    return FAILED
 
 
-def compare_guess_to_answer(attempt, guess, answer):
-    comparison = wordle_compare(guess, answer)
-    print(f"Guess {attempt}: {guess}; Pattern: {comparison}")
-    return comparison
+def compare_guess_to_answer(attempt, suggestion, answer):
+    comparison = wordle_compare(suggestion, answer)
+    print(f"Guess {attempt}: {suggestion}; Pattern: {comparison}")
+    return suggestion, comparison
 
 
-def get_user_input(attempt, guess, answer):
-    print(f"\nGuess {attempt}: {guess}\n")
-    # print("Input colour pattern:")
-    return input("Input colour pattern: ").upper()
+def valid_input(prompt, response_pattern):
+    value = input(prompt)
+    while not re.match(response_pattern, value):
+        print("Invalid input")
+        value = input(prompt)
+    return value
+
+
+def get_user_input(attempt, suggestion, answer):
+    guess = valid_input(f"\n{attempt}: Enter guess or accept suggestion [{suggestion}]: ", "^([A-Za-z]{5}|)$").lower()
+    comparison = valid_input("Input colour pattern: ", "^[YyNnSs]{5}$").upper()
+    return guess or suggestion, comparison
 
 
 if __name__ == "__main__":
