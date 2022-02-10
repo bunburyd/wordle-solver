@@ -156,7 +156,7 @@ def get_user_input(attempt, suggestion, answer):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--word-file", type=str)
+    parser.add_argument("--word-file", type=str, required=True)
     parser.add_argument("--word", type=str)
 
     args = parser.parse_args()
